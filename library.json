@@ -1,0 +1,24 @@
+{
+    "name": "AD7719",
+    "version": "1.0.0",
+    "description": "A \"Hello world\" program is a computer program that outputs \"Hello World\" (or some variant) on a display device",
+    "keywords": "AD7719, happiness, people",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/FabianVoelker/AD7719"
+    },
+    "authors":
+    [
+      {
+        "name": "Fabian Voelker",
+        "email": "fabianvoelker1996@gmail.com",
+        "maintainer": true
+      }
+    ],
+    "license": "MIT",
+    "homepage": "https://www.promesstec.de/",
+    "frameworks": "arduino",
+    "platforms": "atmelavr, atmelsam, ststm32, teensy, espressif8266, espressif32",
+    "headers": "AD7719.h"
+  }
