@@ -90,3 +90,4 @@ void AD7719::setBuffer(bool isbuffered)
     uint8_t cmd[2] = {AD7719_WRITE_MODE_REG,_mode};
     spi_dev->write(cmd,2);
 }
+

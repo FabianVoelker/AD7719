@@ -97,6 +97,8 @@ public:
   void setMode(uint8_t mode);
   bool getBuffer();
   void setBuffer(bool isbuffered);
+  //bool getCHCON()
+  //void setCHCON()
 
   int readADC(uint8_t channel);
   int readADCDifference(uint8_t differential);
