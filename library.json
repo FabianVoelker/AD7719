@@ -1,8 +1,8 @@
 {
     "name": "AD7719",
     "version": "1.0.0",
-    "description": "A \"Hello world\" program is a computer program that outputs \"Hello World\" (or some variant) on a display device",
-    "keywords": "AD7719, happiness, people",
+    "description": "This is a library for the Low Voltage, Low Power, Factory-Calibrated 16-/24-Bit Dual AD7719 Analog to Digital Converter",
+    "keywords": "AD7719, 24-Bit, 16-Bit, Analog to Digital Converter, ADC, Dual",
     "repository":
     {
       "type": "git",
