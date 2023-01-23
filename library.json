@@ -31,7 +31,8 @@
     [
         {
           "adafruit/Adafruit_BusIO":"^1.14.1",
-          "name": "SPI"
+          "SPI":"*",
+          "Wire":"*"
         }
     ]
   }

@@ -13,6 +13,7 @@
 #define __AD7719_H__
 
 #include <SPI.h>
+#include <Adafruit_SPIDevice.h>
 
 
 #define AD7719_COM_REG 0x00 
