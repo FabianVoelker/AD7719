@@ -30,9 +30,7 @@
     "dependencies": 
     [
         {
-          "adafruit/Adafruit_BusIO":"^1.14.1",
-          "SPI":"*",
-          "Wire":"*"
+          "adafruit/Adafruit_BusIO":"^1.14.1"
         }
     ]
   }
