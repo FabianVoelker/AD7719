@@ -1,6 +1,6 @@
 {
     "name": "AD7719",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "This is a library for the Low Voltage, Low Power, Factory-Calibrated 16-/24-Bit Dual AD7719 Analog to Digital Converter",
     "keywords": "AD7719, 24-Bit, 16-Bit, Analog to Digital Converter, ADC, Dual",
     "repository":
