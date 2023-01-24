@@ -678,10 +678,17 @@ void AD7719::setAuxADCInputRange(uint8_t inputrange)
 
 uint8_t AD7719::getADCFilter(void)
 {
-  
+    uint8_t cmd, filter;
+    cmd = AD7719_READ_FILT_REG;
+    spi_dev->write_then_read(&cmd,1,&filter,1);
+    return filter;
 }
 
-void AD7719::setADCFilter(uint8_t)
+void AD7719::setADCFilter(uint8_t filter)
 {
-
+    if(filter<AD7719_FILT_MIN)filter=AD7719_FILT_MIN;
+    if(filter>AD7719_FILT_MAX)filter=AD7719_FILT_MAX;
+    _filter = filter;
+    uint8_t cmd[2] = {AD7719_WRITE_FILT_REG,_filter};
+    spi_dev->write(cmd,2);
 }

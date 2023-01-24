@@ -36,7 +36,7 @@
 #define AD7719_WRITE_MODE_REG           0x01    // 0000 0001  Write MODE register     [8-Bit]
 #define AD7719_WRITE_AD0CON_REG         0x02    // 0000 0010  Write AD0CON register   [8-Bit]
 #define AD7719_WRITE_AD1CON_REG         0x03    // 0000 0011  Write AD1CON register   [8-Bit]
-#define AD7719_WRITE_FILT_REG           0x04    // 0000 0011  Write FILTER register   [8-Bit]
+#define AD7719_WRITE_FILT_REG           0x04    // 0000 0100  Write FILTER register   [8-Bit]
 #define AD7719_WRITE_IOCON_REG          0x07    // 0000 0111  Write IOCON register    [16-Bit]
 
 // Calibration register -> Done bei Analog Devices
@@ -176,6 +176,11 @@
 
 
 
+/*------------------------*/
+/*  Filter Register Bits  */
+/*------------------------*/
+
+
 
 
 class AD7719
@@ -242,7 +247,7 @@ public:
 
    /*-----------------------*/
   uint8_t getADCFilter(void);
-  void setADCFilter(uint8_t);
+  void setADCFilter(uint8_t filter);
 
   int readADC(uint8_t channel);
   int readADCDifference(uint8_t differential);
@@ -265,6 +270,7 @@ private:
   uint8_t _inputrange;
   uint8_t _auxcontrol;
   bool _isauxnabled;
+  uint8_t _filter;
 };
 
 
