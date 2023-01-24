@@ -176,10 +176,27 @@
 
 
 
-/*------------------------*/
-/*  Filter Register Bits  */
-/*------------------------*/
+/*---------------------*/
+/*  I/O Register Bits  */
+/*---------------------*/
+#define AD7719_IO_REGBIT_PSW2       0x8000        // Erklärung
+#define AD7719_IO_REGBIT_PSW1       0x4000        // Erklärung
+#define AD7719_IO_REGBIT_BO         0x1000        // Erklärung
+#define AD7719_IO_REGBIT_I2PIN      0x0800        // Erklärung
+#define AD7719_IO_REGBIT_I1PIN      0x0400        // Erklärung
+#define AD7719_IO_REGBIT_I2EN       0x0200        // Erklärung
+#define AD7719_IO_REGBIT_I1EN       0x0100        // Erklärung
+#define AD7719_IO_REGBIT_P4DIR      0x0080        // Erklärung
+#define AD7719_IO_REGBIT_P3DIR      0x0040        // Erklärung
+#define AD7719_IO_REGBIT_P2EN       0x0020        // Erklärung
+#define AD7719_IO_REGBIT_P1EN       0x0010        // Erklärung
+#define AD7719_IO_REGBIT_P4DAT      0x0008        // Erklärung
+#define AD7719_IO_REGBIT_P3DAT      0x0004        // Erklärung
+#define AD7719_IO_REGBIT_P4DAT      0x0002        // Erklärung
+#define AD7719_IO_REGBIT_P1DAT      0x0001        // Erklärung
 
+#define AD7719_PSW_PWRGND           1
+#define AD7719_PSW_STDIO            0
 
 
 
@@ -245,12 +262,48 @@ public:
   uint8_t getAuxADCInputRange(void);
   void setAuxADCInputRange(uint8_t inputrange);
 
-   /*-----------------------*/
+  
   uint8_t getADCFilter(void);
   void setADCFilter(uint8_t filter);
 
-  int readADC(uint8_t channel);
-  int readADCDifference(uint8_t differential);
+   /*-----------------------*/
+  uint16_t getIOCON(void);
+  void setIOCON(uint16_t iocon);
+
+  bool getPowerSwitch2Control(void);
+  void setPowerSwitch2Control(bool psw2);
+
+  bool getPowerSwitch1Control(void);
+  void setPowerSwitch1Control(bool psw1);
+
+  bool isBurnoutCurrentEnabled(void);
+  void enableBurnoutCurrent(bool burnout);
+
+  bool getIEXE2Direction(void);
+  void setIEXE2Direction(bool iexe2);
+
+  bool getIEXE1Direction(void);
+  void setIEXE1Direction(bool iexe1);
+
+  bool isIEXC2Enabled(void);
+  void enableIEXC2(bool iexc2);
+
+  bool isIEXC1Enabled(void);
+  void enableIEXC1(bool iexc1);
+
+  bool getP4PinMode(void);
+  void setP4PinMode(bool p4dir);
+  bool getP4State(void);
+
+  bool getP3PinMode(void);
+  void setP3PinMode(bool p3dir);
+  bool getP3State(void);
+
+  bool getP2OutputFunction(void);
+  void setP2OutputFunction(bool p2out);
+
+  bool getP1OutputFunction(void);
+  void setP1OutputFunction(bool p1out);
 
 
 
@@ -271,6 +324,9 @@ private:
   uint8_t _auxcontrol;
   bool _isauxnabled;
   uint8_t _filter;
+  uint16_t _iocon;
+  uint16_t _psw2;
+  uint16_t _psw1;
 };
 
 

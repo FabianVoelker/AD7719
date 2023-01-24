@@ -387,7 +387,7 @@ bool AD7719::getMainADCPolarity(void)
     if(maincontrol & AD7719_CONTROL_REGBIT_UB)
     {
         _polarity = true;
-        return AD7719_MAINADC_POL_UNIPOLAR
+        return AD7719_MAINADC_POL_UNIPOLAR;
     }
     else
     {
@@ -691,4 +691,176 @@ void AD7719::setADCFilter(uint8_t filter)
     _filter = filter;
     uint8_t cmd[2] = {AD7719_WRITE_FILT_REG,_filter};
     spi_dev->write(cmd,2);
+}
+
+
+uint16_t AD7719::getIOCON(void)
+{
+    uint8_t cmd;
+    uint8_t ioconfig[2] = {0,0};
+    cmd = AD7719_READ_IOCON_REG;
+    spi_dev->write_then_read(&cmd,1,ioconfig,2);
+    uint16_t temp = ioconfig[0];
+    temp <<= 8;
+    temp |= ioconfig[1];
+    return temp;
+}
+
+void AD7719::setIOCON(uint16_t iocon)
+{
+    _iocon = iocon;
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
+}
+
+bool AD7719::getPowerSwitch2Control(void)
+{
+    uint16_t ioconfig = getIOCON();
+
+    if(ioconfig & AD7719_IO_REGBIT_PSW2)
+    {
+        _psw2 = true;
+        return AD7719_PSW_PWRGND;
+    }
+    else
+    {
+        _psw2 = false;
+        return AD7719_PSW_STDIO;
+    }
+}
+
+void AD7719::setPowerSwitch2Control(bool psw2)
+{
+
+}
+
+
+bool AD7719::getPowerSwitch1Control(void)
+{
+    uint16_t ioconfig = getIOCON();
+
+    if(ioconfig & AD7719_IO_REGBIT_PSW1)
+    {
+        _psw1 = true;
+        return AD7719_PSW_PWRGND;
+    }
+    else
+    {
+        _psw1 = false;
+        return AD7719_PSW_STDIO;
+    }
+}
+
+void AD7719::setPowerSwitch1Control(bool psw1)
+{
+
+}
+
+
+bool AD7719::isBurnoutCurrentEnabled(void)
+{
+
+}
+
+void AD7719::enableBurnoutCurrent(bool burnout)
+{
+
+}
+
+
+bool AD7719::getIEXE2Direction(void)
+{
+
+}
+
+void AD7719::setIEXE2Direction(bool iexe2)
+{
+
+}
+
+
+bool AD7719::getIEXE1Direction(void)
+{
+
+}
+
+void AD7719::setIEXE1Direction(bool iexe1)
+{
+
+}
+
+
+bool AD7719::isIEXC2Enabled(void)
+{
+
+}
+
+void AD7719::enableIEXC2(bool iexc2)
+{
+
+}
+
+
+bool AD7719::isIEXC1Enabled(void)
+{
+
+}
+
+void AD7719::enableIEXC1(bool iexc1)
+{
+
+}
+
+
+bool AD7719::getP4PinMode(void)
+{
+
+}
+
+void AD7719::setP4PinMode(bool p4dir)
+{
+
+}
+
+bool AD7719::getP4State(void)
+{
+
+}
+
+
+bool AD7719::getP3PinMode(void)
+{
+
+}
+
+void AD7719::setP3PinMode(bool p3dir)
+{
+
+}
+
+bool AD7719::getP3State(void)
+{
+
+}
+
+
+bool AD7719::getP2OutputFunction(void)
+{
+
+}
+
+void AD7719::setP2OutputFunction(bool p2out)
+{
+
+}
+
+
+bool AD7719::getP1OutputFunction(void)
+{
+
+}
+
+void AD7719::setP1OutputFunction(bool p1out)
+{
+
 }
