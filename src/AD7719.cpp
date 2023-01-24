@@ -162,37 +162,10 @@ void AD7719::setOscillatorPowerDown(bool opd)
 
 u_int8_t AD7719::getADCMode()
 {
-    uint8_t cmd, mode, adcmode;
+    uint8_t cmd, mode;
     cmd = AD7719_READ_MODE_REG;
     spi_dev->write_then_read(&cmd,1,&mode,1);
-    adcmode = (mode & AD7719_MODE_REGBITS);
-    switch (adcmode)
-    {
-    case 0:
-      _adcmode = AD7719_POWERDOWNMODE;
-      break;
-    case 1:
-      _adcmode = AD7719_IDLEMODE;
-      break; 
-    case 2:    
-      _adcmode = AD7719_SINGLECONVMODE; 
-      break;
-    case 3:    
-      _adcmode = AD7719_CONTINUOUSMODE;  
-      break;
-    case 4:    
-      _adcmode = AD7719_INTZEROSCCAL;
-      break;
-    case 5:    
-      _adcmode = AD7719_INTFULLSCCAL;
-      break;
-    case 6:    
-      _adcmode = AD7719_SYSTEMZEROSCCAL;
-      break;
-    case 7:    
-      _adcmode = AD7719_SYSTEMFULLSCCAL;
-      break;
-    }
+    _adcmode = (mode & AD7719_MODE_REGBITS);
     return _adcmode;
 }
 
@@ -436,4 +409,279 @@ void AD7719::setMainADCPolarity(bool polarity)
     }
     uint8_t cmd[2] = {AD7719_WRITE_AD0CON_REG,_maincontrol};
     spi_dev->write(cmd,2);
+}
+
+
+uint8_t AD7719::getMainADCInputRange(void)
+{
+    uint8_t cmd, maincontrol;
+    cmd = AD7719_READ_AD0CON_REG;
+    spi_dev->write_then_read(&cmd,1,&maincontrol,1);
+    _adcmode = (maincontrol & AD7719_CONTROL_REGBITS_RANGE);
+    return _adcmode;
+}
+
+void AD7719::setMainADCInputRange(uint8_t inputrange)
+{
+    _maincontrol = getMainADCControl();
+
+    switch (inputrange)
+    {
+    case AD7719_MAINADC_RANGE_20mV:
+      _inputrange = AD7719_MAINADC_RANGE_20mV;
+      break;
+    case AD7719_MAINADC_RANGE_40mV:
+      _inputrange = AD7719_MAINADC_RANGE_40mV;
+      break; 
+    case AD7719_MAINADC_RANGE_80mV:    
+      _inputrange = AD7719_MAINADC_RANGE_80mV; 
+      break;
+    case AD7719_MAINADC_RANGE_160mV:    
+      _inputrange = AD7719_MAINADC_RANGE_160mV;  
+      break;
+    case AD7719_MAINADC_RANGE_320mV:    
+      _inputrange = AD7719_MAINADC_RANGE_320mV;
+      break;
+    case AD7719_MAINADC_RANGE_640mV:    
+      _inputrange = AD7719_MAINADC_RANGE_640mV;
+      break;
+    case AD7719_MAINADC_RANGE_1V28:    
+      _inputrange = AD7719_MAINADC_RANGE_1V28;
+      break;
+    case AD7719_MAINADC_RANGE_2V56:    
+      _inputrange = AD7719_MAINADC_RANGE_2V56;
+      break;
+    default:
+      _inputrange = AD7719_MAINADC_RANGE_2V56;
+      return;
+      break;
+    }
+    _maincontrol&=0xF8;
+    _maincontrol+=_inputrange;
+    uint8_t cmd[2] = {AD7719_WRITE_AD0CON_REG,_maincontrol};
+    spi_dev->write(cmd,2);
+}
+
+
+uint8_t AD7719::getAuxADCControl(void)
+{
+    uint8_t cmd, auxcontrol;
+    cmd = AD7719_READ_AD1CON_REG;
+    spi_dev->write_then_read(&cmd,1,&auxcontrol,1);
+    return auxcontrol;
+}
+
+void AD7719::setAuxADCControl(uint8_t auxcontrol)
+{
+    _auxcontrol = auxcontrol;
+    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd,2);
+}
+
+  
+bool AD7719::isAuxADCEnable(void)
+{
+    uint8_t cmd, auxcontrol;
+    cmd = AD7719_READ_AD1CON_REG;
+    spi_dev->write_then_read(&cmd,1,&auxcontrol,1);
+    if(auxcontrol & AD7719_AUXCONTROL_REGBIT_AD1EN)
+    {
+        _isauxnabled = true;
+        return _isauxnabled;
+    }
+    else
+    {
+        _isauxnabled = false;
+        return _isauxnabled;
+    }
+}
+
+void AD7719::enableAuxADC(void)
+{
+    _auxcontrol = getAuxADCControl();
+    _auxcontrol |= AD7719_AUXCONTROL_REGBIT_AD1EN;
+    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd,2);
+}
+
+void AD7719::disableAuxADC(void)
+{
+    _auxcontrol = getAuxADCControl();
+    _auxcontrol |= AD7719_AUXCONTROL_REGBIT_AD1EN;
+    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd,2);
+}
+
+
+uint8_t AD7719::getAuxADCChannelSelection(void)
+{
+    uint8_t modeReg = getMode();
+    uint8_t cmd, channelselection;
+    cmd = AD7719_READ_AD1CON_REG;
+    spi_dev->write_then_read(&cmd,1,&channelselection,1);
+
+    channelselection &= AD7719_AUXCONTROL_REGBIT_CHSEL;
+    modeReg &= AD7719_MODE_REGBIT_CHCON;
+    modeReg = modeReg << 3;
+    channelselection |= modeReg;
+    channelselection = channelselection >> 4;
+
+    return channelselection;
+}
+
+void AD7719::setAuxADCChannelSelection(uint8_t channelselection)
+{
+    _auxcontrol = getAuxADCControl();
+    _mode = getMode();
+
+    switch (channelselection)
+    {
+    case AD7719_AUXADC_CHSEL_0_AIN3_AGND:
+      _mode &= ~AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_0_AIN4_AGND:
+      _mode &= ~AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH0;
+      break; 
+    case AD7719_AUXADC_CHSEL_0_AIN5_AIN6:    
+      _mode &= ~AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_0_TEMP:    
+      _mode &= ~AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_0_AGND_AGND:    
+      _mode &= ~AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_1_AIN5_AGND:    
+      _mode |= AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_1_AIN6_AGND:    
+      _mode |= AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_1_AIN5_AIN6:    
+      _mode |= AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_1_TEMP:    
+      _mode |= AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    case AD7719_AUXADC_CHSEL_1_AGND_AGND:    
+      _mode |= AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol |= AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    default:
+      _mode &= ~AD7719_MODE_REGBIT_CHCON;    
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH2;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH1;
+      _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
+      break;
+    }
+    uint8_t cmd[2] = {AD7719_WRITE_MODE_REG,_mode};
+    spi_dev->write(cmd,2);
+    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd,2);
+}
+
+
+bool AD7719::getMainADCPolarity(void)
+{
+    uint8_t cmd, auxcontrol;
+    cmd = AD7719_READ_AD1CON_REG;
+    spi_dev->write_then_read(&cmd,1,&auxcontrol,1);
+    if(auxcontrol & AD7719_AUXCONTROL_REGBIT_UB)
+    {
+        _polarity = true;
+        return AD7719_AUXADC_POL_UNIPOLAR;
+    }
+    else
+    {
+        _polarity = false;
+        return AD7719_AUXADC_POL_BIPOLAR;
+    }
+}
+
+void AD7719::setMainADCPolarity(bool polarity)
+{
+    _auxcontrol = getAuxADCControl();
+    if(polarity)
+    {
+        _auxcontrol |= AD7719_AUXCONTROL_REGBIT_UB;
+    }
+    else
+    {
+        _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_UB;
+    }
+    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd,2);
+}
+
+
+uint8_t AD7719::getAuxADCInputRange(void)
+{
+    uint8_t cmd, auxcontrol;
+    cmd = AD7719_READ_AD1CON_REG;
+    spi_dev->write_then_read(&cmd,1,&auxcontrol,1);
+    _adcmode = (auxcontrol & AD7719_AUXCONTROL_REGBIT_RANGE);
+    return _adcmode;
+}
+
+void AD7719::setAuxADCInputRange(uint8_t inputrange)
+{
+    _auxcontrol = getAuxADCControl();
+
+    switch (inputrange)
+    {
+    case AD7719_AUXADC_RANGE_REFIN05:
+      _inputrange = AD7719_AUXADC_RANGE_REFIN05;
+      break;
+    case AD7719_AUXADC_RANGE_REFIN2:
+      _inputrange = AD7719_AUXADC_RANGE_REFIN2;
+      break; 
+    default:
+      _inputrange = AD7719_AUXADC_RANGE_REFIN2;
+      return;
+      break;
+    }
+    _auxcontrol&=0xFE;
+    _auxcontrol+=_inputrange;
+    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd,2);
+}
+
+
+uint8_t AD7719::getADCFilter(void)
+{
+  
+}
+
+void AD7719::setADCFilter(uint8_t)
+{
+
 }

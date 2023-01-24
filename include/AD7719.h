@@ -101,15 +101,16 @@
 
 
 
-/*-----------------------*/
-/* Control Register Bits */
-/*-----------------------*/
-#define AD7719_CONTROL_REGBIT_AD0EN     0x80        // Erklärung
-#define AD7719_CONTROL_REGBIT_WL        0x40        // Erklärung
-#define AD7719_CONTROL_REGBIT_CH1       0x20        // Erklärung
-#define AD7719_CONTROL_REGBIT_CH0       0x10        // Erklärung
-#define AD7719_CONTROL_REGBIT_CHSEL     0x30        // Erklärung
-#define AD7719_CONTROL_REGBIT_UB        0x07        // Erklärung
+/*------------------------*/
+/*  AD0CON Register Bits  */
+/*------------------------*/
+#define AD7719_CONTROL_REGBIT_AD0EN       0x80        // Erklärung
+#define AD7719_CONTROL_REGBIT_WL          0x40        // Erklärung
+#define AD7719_CONTROL_REGBIT_CH1         0x20        // Erklärung
+#define AD7719_CONTROL_REGBIT_CH0         0x10        // Erklärung
+#define AD7719_CONTROL_REGBIT_CHSEL       0x30        // Erklärung
+#define AD7719_CONTROL_REGBIT_UB          0x08        // Erklärung
+#define AD7719_CONTROL_REGBITS_RANGE      0x07        // Erklärung
 
 #define AD7719_MAINADC_RESOLUTION_24BIT   0
 #define AD7719_MAINADC_RESOLUTION_16BIT   1
@@ -134,6 +135,48 @@
 #define AD7719_MAINADC_RANGE_640mV        5
 #define AD7719_MAINADC_RANGE_1V28         6
 #define AD7719_MAINADC_RANGE_2V56         7
+
+
+
+/*------------------------*/
+/*  AD1CON Register Bits  */
+/*------------------------*/
+#define AD7719_AUXCONTROL_REGBIT_AD1EN      0x80        // Erklärung
+#define AD7719_AUXCONTROL_REGBIT_CH2        0x40        // Erklärung
+#define AD7719_AUXCONTROL_REGBIT_CH1        0x20        // Erklärung
+#define AD7719_AUXCONTROL_REGBIT_CH0        0x10        // Erklärung
+#define AD7719_AUXCONTROL_REGBIT_CHSEL      0x70        // Erklärung
+#define AD7719_AUXCONTROL_REGBIT_UB         0x08        // Erklärung
+#define AD7719_AUXCONTROL_REGBIT_RANGE      0x01        // Erklärung
+
+#define AD7719_AUXADC_CHSEL_0_AIN3_AGND     0
+#define AD7719_AUXADC_CHSEL_0_AIN4_AGND     1
+#define AD7719_AUXADC_CHSEL_0_AIN5_AIN6     2
+#define AD7719_AUXADC_CHSEL_0_TEMP          3
+#define AD7719_AUXADC_CHSEL_0_AGND_AGND     4
+#define AD7719_AUXADC_CHSEL_1_AIN5_AGND     8
+#define AD7719_AUXADC_CHSEL_1_AIN6_AGND     9
+#define AD7719_AUXADC_CHSEL_1_AIN5_AIN6     10
+#define AD7719_AUXADC_CHSEL_1_TEMP          11
+#define AD7719_AUXADC_CHSEL_1_AGND_AGND     12
+
+#define AD7719_AUXADC_POL_UNIPOLAR          1
+#define AD7719_AUXADC_POL_BIPOLAR           0
+
+#define AD7719_AUXADC_RANGE_REFIN2          1
+#define AD7719_AUXADC_RANGE_REFIN05         0
+
+
+
+/*------------------------*/
+/*  Filter Register Bits  */
+/*------------------------*/
+#define AD7719_FILT_MIN         0x0D    // Erklärung
+#define AD7719_FILT_MAX         0xFF    // Erklärung 
+
+
+
+
 
 class AD7719
 {
@@ -176,13 +219,35 @@ public:
   bool getMainADCPolarity(void);
   void setMainADCPolarity(bool polarity);
 
-   /*-----------------------*/
   uint8_t getMainADCInputRange(void);
-  void setMainADCInputRange(uint8_t);
+  void setMainADCInputRange(uint8_t inputrange);
 
+  
+  uint8_t getAuxADCControl(void);
+  void setAuxADCControl(uint8_t auxcontrol);
+  
+  bool isAuxADCEnable(void);
+  void enableAuxADC(void);
+  void disableAuxADC(void);
+
+ 
+  uint8_t getAuxADCChannelSelection(void);
+  void setAuxADCChannelSelection(uint8_t channelselection);
+
+  bool getMainADCPolarity(void);
+  void setMainADCPolarity(bool polarity);
+
+  uint8_t getAuxADCInputRange(void);
+  void setAuxADCInputRange(uint8_t inputrange);
+
+   /*-----------------------*/
+  uint8_t getADCFilter(void);
+  void setADCFilter(uint8_t);
 
   int readADC(uint8_t channel);
   int readADCDifference(uint8_t differential);
+
+
 
 private:
   Adafruit_SPIDevice *spi_dev = NULL;
@@ -197,6 +262,9 @@ private:
   uint8_t _mainresolution;
   uint8_t _channelselection;
   bool _polarity;
+  uint8_t _inputrange;
+  uint8_t _auxcontrol;
+  bool _isauxnabled;
 };
 
 
