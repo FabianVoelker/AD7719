@@ -81,8 +81,59 @@
 /*--------------------*/
 #define AD7719_MODE_REGBIT_BUF          0x40        // Erklärung
 #define AD7719_MODE_REGBIT_CHCON        0x10        // Erklärung
+#define AD7719_MODE_REGBIT_OSCPD        0x08        // Erklärung
+#define AD7719_MODE_REGBITS             0x07        // Erklärung
+
+#define AD7719_MAIN_PSEUDODIFF          1 
+#define AD7719_MAIN_FULLYDIFF           0
+
+#define AD7719_OSCI_STANDBY             1
+#define AD7719_OSCI_RUN                 0
+
+#define AD7719_POWERDOWNMODE            0
+#define AD7719_IDLEMODE                 1
+#define AD7719_SINGLECONVMODE           2
+#define AD7719_CONTINUOUSMODE           3
+#define AD7719_INTZEROSCCAL             4
+#define AD7719_INTFULLSCCAL             5
+#define AD7719_SYSTEMZEROSCCAL          6
+#define AD7719_SYSTEMFULLSCCAL          7
 
 
+
+/*-----------------------*/
+/* Control Register Bits */
+/*-----------------------*/
+#define AD7719_CONTROL_REGBIT_AD0EN     0x80        // Erklärung
+#define AD7719_CONTROL_REGBIT_WL        0x40        // Erklärung
+#define AD7719_CONTROL_REGBIT_CH1       0x20        // Erklärung
+#define AD7719_CONTROL_REGBIT_CH0       0x10        // Erklärung
+#define AD7719_CONTROL_REGBIT_CHSEL     0x30        // Erklärung
+#define AD7719_CONTROL_REGBIT_UB        0x07        // Erklärung
+
+#define AD7719_MAINADC_RESOLUTION_24BIT   0
+#define AD7719_MAINADC_RESOLUTION_16BIT   1
+
+#define AD7719_MAINADC_CHSEL_0_AIN1_AIN2  0
+#define AD7719_MAINADC_CHSEL_0_AIN3_AIN4  1
+#define AD7719_MAINADC_CHSEL_0_AIN2_AIN2  2
+#define AD7719_MAINADC_CHSEL_0_AIN3_AIN2  3
+#define AD7719_MAINADC_CHSEL_1_AIN1_AIN4  4
+#define AD7719_MAINADC_CHSEL_1_AIN3_AIN4  5
+#define AD7719_MAINADC_CHSEL_1_AIN4_AIN4  6
+#define AD7719_MAINADC_CHSEL_1_AIN2_AIN4  7
+
+#define AD7719_MAINADC_POL_UNIPOLAR       1
+#define AD7719_MAINADC_POL_BIPOLAR        0
+
+#define AD7719_MAINADC_RANGE_20mV         0
+#define AD7719_MAINADC_RANGE_40mV         1
+#define AD7719_MAINADC_RANGE_80mV         2
+#define AD7719_MAINADC_RANGE_160mV        3
+#define AD7719_MAINADC_RANGE_320mV        4
+#define AD7719_MAINADC_RANGE_640mV        5
+#define AD7719_MAINADC_RANGE_1V28         6
+#define AD7719_MAINADC_RANGE_2V56         7
 
 class AD7719
 {
@@ -91,14 +142,44 @@ public:
   bool begin(uint8_t cs = SS, SPIClass *theSPI = &SPI);
   bool begin(uint8_t sck, uint8_t mosi, uint8_t miso, uint8_t cs);
 
-  uint8_t getStatus();
+  uint8_t getStatus(void);
 
-  uint8_t getMode();
+  uint8_t getMode(void);
   void setMode(uint8_t mode);
-  bool getBuffer();
-  void setBuffer(bool isbuffered);
-  //bool getCHCON()
-  //void setCHCON()
+
+  bool getBuffered(void);
+  void setBuffered(bool isbuffered);
+
+  bool getChannelConfiguration(void);
+  void setChannelConfiguration(bool channelconfig);
+
+  bool getOscillatorPowerDown(void);
+  void setOscillatorPowerDown(bool opd);
+
+  u_int8_t getADCMode(void);
+  void setADCMode(uint8_t adcmode);
+
+
+  uint8_t getMainADCControl(void);
+  void setMainADCControl(uint8_t maincontrol);
+  
+  bool isMainADCEnable(void);
+  void enableMainADC(void);
+  void disableMainADC(void);
+
+  uint8_t getMainADCResolution(void);
+  void setMainADCResolution(uint8_t resolution);
+
+  uint8_t getMainADCChannelSelection(void);
+  void setMainADCChannelSelection(uint8_t channelselection);
+
+  bool getMainADCPolarity(void);
+  void setMainADCPolarity(bool polarity);
+
+   /*-----------------------*/
+  uint8_t getMainADCInputRange(void);
+  void setMainADCInputRange(uint8_t);
+
 
   int readADC(uint8_t channel);
   int readADCDifference(uint8_t differential);
@@ -108,6 +189,14 @@ private:
   uint8_t _cs;
   uint8_t _mode;
   bool _isbuffered;
+  bool _channelconfig;
+  bool _opd;
+  uint8_t _adcmode;
+  uint8_t _maincontrol;
+  bool _ismainenabled;
+  uint8_t _mainresolution;
+  uint8_t _channelselection;
+  bool _polarity;
 };
 
 
