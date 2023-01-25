@@ -20,6 +20,7 @@
 #endif
 #include <Adafruit_SPIDevice.h>
 #include <SPI.h>
+#include <Wire.h>
 
 
 #define AD7719_SPI_ORDER  SPI_BITORDER_MSBFIRST
@@ -28,9 +29,9 @@
 
 
 
-/*================*/
-/* Register table */
-/*================*/
+/*================*//*==========*/
+/* Register table *//* OP-CODES */
+/*================*//*==========*/
 
 // Write Register
 #define AD7719_WRITE_MODE_REG           0x01    // 0000 0001  Write MODE register     [8-Bit]
@@ -76,13 +77,13 @@
 
 
 
-/*--------------------*/
-/* Mode Register Bits */
-/*--------------------*/
-#define AD7719_MODE_REGBIT_BUF          0x40        // Erklärung
-#define AD7719_MODE_REGBIT_CHCON        0x10        // Erklärung
-#define AD7719_MODE_REGBIT_OSCPD        0x08        // Erklärung
-#define AD7719_MODE_REGBITS             0x07        // Erklärung
+/*----------------------*//*-------------------------------------------------*/
+/*  MODE Register Bits  *//* AD0EN|  WL | CH1 | CH0 | U/B | RN2 | RN1 | RN0  */
+/*--------------------- *//*-------------------------------------------------*/ 
+#define AD7719_MODE_REGBIT_BUF          0x40        // Configures the main ADC for buffered or unbuffered mode of operation
+#define AD7719_MODE_REGBIT_CHCON        0x10        // if set the main ADC operates with three pseudodifferential input channels. if cleared the main ADC operates with two fully differential input channels
+#define AD7719_MODE_REGBIT_OSCPD        0x08        // if set the ADC is in standby mode and stopp the crystal oscillator. if cleared the adc start-up (takes 300ms)
+#define AD7719_MODE_REGBITS             0x07        // Main and Aux ADC Mode Bits
 
 #define AD7719_MAIN_PSEUDODIFF          1 
 #define AD7719_MAIN_FULLYDIFF           0
@@ -101,16 +102,16 @@
 
 
 
-/*------------------------*/
-/*  AD0CON Register Bits  */
-/*------------------------*/
-#define AD7719_CONTROL_REGBIT_AD0EN       0x80        // Erklärung
-#define AD7719_CONTROL_REGBIT_WL          0x40        // Erklärung
-#define AD7719_CONTROL_REGBIT_CH1         0x20        // Erklärung
-#define AD7719_CONTROL_REGBIT_CH0         0x10        // Erklärung
-#define AD7719_CONTROL_REGBIT_CHSEL       0x30        // Erklärung
-#define AD7719_CONTROL_REGBIT_UB          0x08        // Erklärung
-#define AD7719_CONTROL_REGBITS_RANGE      0x07        // Erklärung
+/*------------------------*//*-------------------------------------------------*/
+/*  AD0CON Register Bits  *//* AD0EN|  WL | CH1 | CH0 | U/B | RN2 | RN1 | RN0  */
+/*------------------------*//*-------------------------------------------------*/ 
+#define AD7719_CONTROL_REGBIT_AD0EN       0x80        // Enable/Disable the main ADC
+#define AD7719_CONTROL_REGBIT_WL          0x40        // if set main ADC in 16-Bit Mode. If cleared main ADC in 24-Bit Mode
+#define AD7719_CONTROL_REGBIT_CH1         0x20        // Main ADC Channel selection bit
+#define AD7719_CONTROL_REGBIT_CH0         0x10        // Main ADC Channel selection bit
+#define AD7719_CONTROL_REGBIT_CHSEL       0x30        // Main ADC Channel selection bit
+#define AD7719_CONTROL_REGBIT_UB          0x08        // if set ADC in Unipolar Mode. if cleared ADC in Bipolar Mode
+#define AD7719_CONTROL_REGBITS_RANGE      0x07        
 
 #define AD7719_MAINADC_RESOLUTION_24BIT   0
 #define AD7719_MAINADC_RESOLUTION_16BIT   1
@@ -138,16 +139,16 @@
 
 
 
-/*------------------------*/
-/*  AD1CON Register Bits  */
-/*------------------------*/
-#define AD7719_AUXCONTROL_REGBIT_AD1EN      0x80        // Erklärung
-#define AD7719_AUXCONTROL_REGBIT_CH2        0x40        // Erklärung
-#define AD7719_AUXCONTROL_REGBIT_CH1        0x20        // Erklärung
-#define AD7719_AUXCONTROL_REGBIT_CH0        0x10        // Erklärung
-#define AD7719_AUXCONTROL_REGBIT_CHSEL      0x70        // Erklärung
-#define AD7719_AUXCONTROL_REGBIT_UB         0x08        // Erklärung
-#define AD7719_AUXCONTROL_REGBIT_RANGE      0x01        // Erklärung
+/*------------------------*//*-------------------------------------------------*/
+/*  AD1CON Register Bits  *//* AD1EN| ACH2| ACH1| ACH0| U/B |  0  |  0  | ARN  */
+/*------------------------*//*-------------------------------------------------*/ 
+#define AD7719_AUXCONTROL_REGBIT_AD1EN      0x80        // Enable/Disable the aux ADC
+#define AD7719_AUXCONTROL_REGBIT_CH2        0x40        // Aux ADC Channel selection bit
+#define AD7719_AUXCONTROL_REGBIT_CH1        0x20        // Aux ADC Channel selection bit
+#define AD7719_AUXCONTROL_REGBIT_CH0        0x10        // Aux ADC Channel selection bit
+#define AD7719_AUXCONTROL_REGBIT_CHSEL      0x70        // Aux ADC Channel selection bit
+#define AD7719_AUXCONTROL_REGBIT_UB         0x08        // if set ADC in Unipolar Mode. if cleared ADC in Bipolar Mode
+#define AD7719_AUXCONTROL_REGBIT_RANGE      0x01        
 
 #define AD7719_AUXADC_CHSEL_0_AIN3_AGND     0
 #define AD7719_AUXADC_CHSEL_0_AIN4_AGND     1
@@ -168,17 +169,20 @@
 
 
 
-/*------------------------*/
-/*  Filter Register Bits  */
-/*------------------------*/
-#define AD7719_FILT_MIN         0x0D    // Erklärung
-#define AD7719_FILT_MAX         0xFF    // Erklärung 
+/*------------------------*//*------------------------------------------------*/
+/*  Filter Register Bits  *//* SF7 | SF6 | SF5 | SF4 | SF3 | SF2 | SF1 | SF0  */
+/*------------------------*//*------------------------------------------------*/            
+#define AD7719_FILT_MIN         0x0D    // Minimum value for filtering
+#define AD7719_FILT_MAX         0xFF    // Maximum value for filtering
 
 
 
-/*---------------------*/
-/*  I/O Register Bits  */
-/*---------------------*/
+/*---------------------*//*-------------------------------------------------*/
+/* I/O Registers Bits  *//*  PSW2| PSW1|  0  | BO  |I2PIN|I1PIN| I2EN| I1EN */
+/*---------------------*//*-------------------------------------------------*/
+                         /*-------------------------------------------------*/
+                         /* P4DIR|P3DIR| P2EN| P1EN|P4DAT|P3DAT|P2DAT|P1DAT */
+                         /*-------------------------------------------------*/
 #define AD7719_IO_REGBIT_PSW2       0x8000        // Erklärung
 #define AD7719_IO_REGBIT_PSW1       0x4000        // Erklärung
 #define AD7719_IO_REGBIT_BO         0x1000        // Erklärung

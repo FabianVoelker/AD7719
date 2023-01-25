@@ -10,7 +10,16 @@
 
 
 #include "AD7719.h"
+
+#ifdef __AVR
+#include <avr/pgmspace.h>
+#elif defined(ESP8266)
+#include <pgmspace.h>
+#endif
+
+#include <stdlib.h>
 #include <SPI.h>
+#include <Wire.h>
 
 
 AD7719::~AD7719() 
