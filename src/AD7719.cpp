@@ -34,7 +34,7 @@ bool AD7719::begin(uint8_t sclk, uint8_t mosi, uint8_t miso, uint8_t cs)
 }
 
 
-uint8_t AD7719::getStatus()
+uint8_t AD7719::getStatus(void)
 {
     uint8_t cmd, status;
     cmd = AD7719_READ_STATUS_REG;
@@ -43,7 +43,7 @@ uint8_t AD7719::getStatus()
 }
 
 
-uint8_t AD7719::getMode()
+uint8_t AD7719::getMode(void)
 {
     uint8_t cmd, mode;
     cmd = AD7719_READ_MODE_REG;
@@ -59,7 +59,7 @@ void AD7719::setMode(uint8_t mode)
 }
 
 
-bool AD7719::getBuffered()
+bool AD7719::getBuffered(void)
 {
     uint8_t cmd, mode;
     cmd = AD7719_READ_MODE_REG;
@@ -93,7 +93,7 @@ void AD7719::setBuffered(bool isbuffered)
 }
 
 
-bool AD7719::getChannelConfiguration()
+bool AD7719::getChannelConfiguration(void)
 {
     uint8_t cmd, mode;
     cmd = AD7719_READ_MODE_REG;
@@ -127,7 +127,7 @@ void AD7719::setChannelConfiguration(bool channelconfig)
 }
 
 
-bool AD7719::getOscillatorPowerDown()
+bool AD7719::getOscillatorPowerDown(void)
 {
     uint8_t cmd, mode;
     cmd = AD7719_READ_MODE_REG;
@@ -160,7 +160,7 @@ void AD7719::setOscillatorPowerDown(bool opd)
     spi_dev->write(cmd,2);
 }
 
-u_int8_t AD7719::getADCMode()
+uint8_t AD7719::getADCMode(void)
 {
     uint8_t cmd, mode;
     cmd = AD7719_READ_MODE_REG;
@@ -267,13 +267,13 @@ uint8_t AD7719::getMainADCResolution(void)
     spi_dev->write_then_read(&cmd,1,&mainresulotion,1);
     if(mainresulotion & AD7719_CONTROL_REGBIT_WL)
     {
-        _mainresolution = 16;
-        return _mainresolution;
+        _mainresolution = AD7719_MAINADC_RESOLUTION_16BIT;
+        return AD7719_MAINADC_RESOLUTION_16BIT;
     }
     else
     {
-        _mainresolution = 24;
-        return _mainresolution;
+        _mainresolution = AD7719_MAINADC_RESOLUTION_24BIT;
+        return AD7719_MAINADC_RESOLUTION_24BIT;
     }
 }
 
@@ -372,10 +372,10 @@ void AD7719::setMainADCChannelSelection(uint8_t channelselection)
       _maincontrol &= ~AD7719_CONTROL_REGBIT_CH0;
       break;
     }
-    uint8_t cmd[2] = {AD7719_WRITE_MODE_REG,_mode};
-    spi_dev->write(cmd,2);
-    uint8_t cmd[2] = {AD7719_WRITE_AD0CON_REG,_maincontrol};
-    spi_dev->write(cmd,2);
+    uint8_t cmd1[2] = {AD7719_WRITE_MODE_REG,_mode};
+    spi_dev->write(cmd1,2);
+    uint8_t cmd2[2] = {AD7719_WRITE_AD0CON_REG,_maincontrol};
+    spi_dev->write(cmd2,2);
 }
 
 
@@ -603,14 +603,14 @@ void AD7719::setAuxADCChannelSelection(uint8_t channelselection)
       _auxcontrol &= ~AD7719_AUXCONTROL_REGBIT_CH0;
       break;
     }
-    uint8_t cmd[2] = {AD7719_WRITE_MODE_REG,_mode};
-    spi_dev->write(cmd,2);
-    uint8_t cmd[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
-    spi_dev->write(cmd,2);
+    uint8_t cmd1[2] = {AD7719_WRITE_MODE_REG,_mode};
+    spi_dev->write(cmd1,2);
+    uint8_t cmd2[2] = {AD7719_WRITE_AD1CON_REG,_auxcontrol};
+    spi_dev->write(cmd2,2);
 }
 
 
-bool AD7719::getMainADCPolarity(void)
+bool AD7719::getAuxADCPolarity(void)
 {
     uint8_t cmd, auxcontrol;
     cmd = AD7719_READ_AD1CON_REG;
@@ -627,7 +627,7 @@ bool AD7719::getMainADCPolarity(void)
     }
 }
 
-void AD7719::setMainADCPolarity(bool polarity)
+void AD7719::setAuxADCPolarity(bool polarity)
 {
     _auxcontrol = getAuxADCControl();
     if(polarity)
@@ -731,15 +731,25 @@ bool AD7719::getPowerSwitch2Control(void)
 
 void AD7719::setPowerSwitch2Control(bool psw2)
 {
-
+    _iocon = getIOCON();
+    _psw2 = psw2;
+    if(_psw2)
+    {
+        _iocon |= AD7719_IO_REGBIT_PSW2;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_PSW2;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::getPowerSwitch1Control(void)
 {
-    uint16_t ioconfig = getIOCON();
-
-    if(ioconfig & AD7719_IO_REGBIT_PSW1)
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_PSW1)
     {
         _psw1 = true;
         return AD7719_PSW_PWRGND;
@@ -753,114 +763,381 @@ bool AD7719::getPowerSwitch1Control(void)
 
 void AD7719::setPowerSwitch1Control(bool psw1)
 {
-
+    _iocon = getIOCON();
+    _psw1 = psw1;
+    if(_psw1)
+    {
+        _iocon |= AD7719_IO_REGBIT_PSW1;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_PSW1;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::isBurnoutCurrentEnabled(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_BO)
+    {
+        _burnout = true;
+        return _burnout;
+    }
+    else
+    {
+        _burnout = false;
+        return _burnout;
+    }
 }
 
 void AD7719::enableBurnoutCurrent(bool burnout)
 {
-
+    _iocon = getIOCON();
+    _burnout = burnout;
+    if(_burnout)
+    {
+        _iocon |= AD7719_IO_REGBIT_PSW1;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_PSW1;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::getIEXE2Direction(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_I2PIN)
+    {
+        _iexe2 = true;
+        return _iexe2;
+    }
+    else
+    {
+        _iexe2 = false;
+        return _iexe2;
+    }
 }
 
 void AD7719::setIEXE2Direction(bool iexe2)
 {
-
+    _iocon = getIOCON();
+    _iexe2 = iexe2;
+    if(_iexe2)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::getIEXE1Direction(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_I1PIN)
+    {
+        _iexe1 = true;
+        return _iexe1;
+    }
+    else
+    {
+        _iexe1 = false;
+        return _iexe1;
+    }
 }
 
 void AD7719::setIEXE1Direction(bool iexe1)
 {
-
+    _iocon = getIOCON();
+    _iexe1 = iexe1;
+    if(_iexe1)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::isIEXC2Enabled(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_I2EN)
+    {
+        _iexc2 = true;
+        return _iexc2;
+    }
+    else
+    {
+        _iexc2 = false;
+        return _iexc2;
+    }
 }
 
 void AD7719::enableIEXC2(bool iexc2)
 {
-
+    _iocon = getIOCON();
+    _iexc2 = iexc2;
+    if(_iexc2)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::isIEXC1Enabled(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_I1EN)
+    {
+        _iexc1 = true;
+        return _iexc1;
+    }
+    else
+    {
+        _iexc1 = false;
+        return _iexc1;
+    }
 }
 
 void AD7719::enableIEXC1(bool iexc1)
 {
-
+    _iocon = getIOCON();
+    _iexc1 = iexc1;
+    if(_iexc1)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::getP4PinMode(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_P4DIR)
+    {
+        _p4dir = true;
+        return _p4dir;
+    }
+    else
+    {
+        _p4dir = false;
+        return _p4dir;
+    }
 }
 
 void AD7719::setP4PinMode(bool p4dir)
 {
-
+    _iocon = getIOCON();
+    _p4dir = p4dir;
+    if(_p4dir)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 bool AD7719::getP4State(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_P4DAT)
+    {
+        _p4dat = true;
+        return _p4dat;
+    }
+    else
+    {
+        _p4dat = false;
+        return _p4dat;
+    }
 }
 
 
 bool AD7719::getP3PinMode(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_P3DIR)
+    {
+        _p3dir = true;
+        return _p3dir;
+    }
+    else
+    {
+        _p3dir = false;
+        return _p3dir;
+    }
 }
 
 void AD7719::setP3PinMode(bool p3dir)
 {
-
+    _iocon = getIOCON();
+    _p3dir = p3dir;
+    if(_p3dir)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 bool AD7719::getP3State(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_P3DAT)
+    {
+        _p3dat = true;
+        return _p3dat;
+    }
+    else
+    {
+        _p3dat = false;
+        return _p3dat;
+    }
 }
 
 
 bool AD7719::getP2OutputFunction(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_P2EN)
+    {
+        _p2en = true;
+        return _p2en;
+    }
+    else
+    {
+        _p2en = false;
+        return _p2en;
+    }
 }
 
 void AD7719::setP2OutputFunction(bool p2out)
 {
-
+    _iocon = getIOCON();
+    _p2en = p2out;
+    if(_p2en)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
 }
 
 
 bool AD7719::getP1OutputFunction(void)
 {
-
+    _iocon = getIOCON();
+    if(_iocon & AD7719_IO_REGBIT_P1EN)
+    {
+        _p1en = true;
+        return _p1en;
+    }
+    else
+    {
+        _p1en = false;
+        return _p1en;
+    }
 }
 
 void AD7719::setP1OutputFunction(bool p1out)
 {
+    _iocon = getIOCON();
+    _p1en = p1out;
+    if(_p1en)
+    {
+        _iocon |= AD7719_IO_REGBIT_I2PIN;
+    }
+    else
+    {
+        _iocon &= ~AD7719_IO_REGBIT_I2PIN;
+    }
+    uint8_t cmd[3] = {AD7719_WRITE_IOCON_REG,(_iocon >> 8),(_iocon & 0xff)};
+    spi_dev->write(cmd,3);
+}
 
+
+uint32_t AD7719::readMainADC(void)
+{
+    uint8_t cmd;
+    uint8_t res = getMainADCResolution();
+    uint32_t temp;
+    if(res)
+    {
+      uint8_t reading[2] = {0,0};
+      cmd = AD7719_READ_AD0DATA_REG;
+      spi_dev->write_then_read(&cmd,1,reading,2);
+      temp = reading[0];
+      temp <<= 8;
+      temp |= reading[1];
+    }
+    else
+    {
+      uint8_t reading[3] = {0,0,0};
+      cmd = AD7719_READ_AD0DATA_REG;
+      spi_dev->write_then_read(&cmd,1,reading,3);
+    }
+    return temp;
+}
+
+uint16_t AD7719::readAuxADC(void)
+{ 
+    uint8_t cmd;
+    uint32_t temp;
+    uint8_t reading[2] = {0,0};
+    cmd = AD7719_READ_AD1DATA_REG;
+    spi_dev->write_then_read(&cmd,1,reading,2);
+    temp = reading[0];
+    temp <<= 8;
+    temp |= reading[1];
+    return temp;
+}
+
+
+uint8_t AD7719::getRev(void)
+{
+    uint8_t cmd, rev;
+    cmd = AD7719_READ_STATUS_REG;
+    spi_dev->write_then_read(&cmd,1,&rev,1);
+    rev >>= 4;
+    return rev;
 }
