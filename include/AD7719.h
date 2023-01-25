@@ -221,7 +221,7 @@ public:
   bool getOscillatorPowerDown(void);
   void setOscillatorPowerDown(bool opd);
 
-  u_int8_t getADCMode(void);
+  uint8_t getADCMode(void);
   void setADCMode(uint8_t adcmode);
 
 
@@ -256,8 +256,8 @@ public:
   uint8_t getAuxADCChannelSelection(void);
   void setAuxADCChannelSelection(uint8_t channelselection);
 
-  bool getMainADCPolarity(void);
-  void setMainADCPolarity(bool polarity);
+  bool getAuxADCPolarity(void);
+  void setAuxADCPolarity(bool polarity);
 
   uint8_t getAuxADCInputRange(void);
   void setAuxADCInputRange(uint8_t inputrange);
@@ -266,7 +266,7 @@ public:
   uint8_t getADCFilter(void);
   void setADCFilter(uint8_t filter);
 
-   /*-----------------------*/
+  
   uint16_t getIOCON(void);
   void setIOCON(uint16_t iocon);
 
@@ -306,6 +306,12 @@ public:
   void setP1OutputFunction(bool p1out);
 
 
+  uint32_t readMainADC(void);
+  uint16_t readAuxADC(void);
+
+
+  uint8_t getRev(void);
+
 
 private:
   Adafruit_SPIDevice *spi_dev = NULL;
@@ -325,26 +331,23 @@ private:
   bool _isauxnabled;
   uint8_t _filter;
   uint16_t _iocon;
-  uint16_t _psw2;
-  uint16_t _psw1;
+  bool _psw2;
+  bool _psw1;
+  bool _burnout;
+  bool _iexe2;
+  bool _iexe1;
+  bool _iexc2;
+  bool _iexc1;
+  bool _p4dir;
+  bool _p3dir;
+  bool _p2en;
+  bool _p1en;
+  bool _p4dat;
+  bool _p3dat;
+  bool _p2dat;
+  bool _p1dat;
+  uint8_t _id;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif
