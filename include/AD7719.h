@@ -183,24 +183,29 @@
                          /*-------------------------------------------------*/
                          /* P4DIR|P3DIR| P2EN| P1EN|P4DAT|P3DAT|P2DAT|P1DAT */
                          /*-------------------------------------------------*/
-#define AD7719_IO_REGBIT_PSW2       0x8000        // Erklärung
-#define AD7719_IO_REGBIT_PSW1       0x4000        // Erklärung
-#define AD7719_IO_REGBIT_BO         0x1000        // Erklärung
-#define AD7719_IO_REGBIT_I2PIN      0x0800        // Erklärung
-#define AD7719_IO_REGBIT_I1PIN      0x0400        // Erklärung
-#define AD7719_IO_REGBIT_I2EN       0x0200        // Erklärung
-#define AD7719_IO_REGBIT_I1EN       0x0100        // Erklärung
-#define AD7719_IO_REGBIT_P4DIR      0x0080        // Erklärung
-#define AD7719_IO_REGBIT_P3DIR      0x0040        // Erklärung
-#define AD7719_IO_REGBIT_P2EN       0x0020        // Erklärung
-#define AD7719_IO_REGBIT_P1EN       0x0010        // Erklärung
-#define AD7719_IO_REGBIT_P4DAT      0x0008        // Erklärung
-#define AD7719_IO_REGBIT_P3DAT      0x0004        // Erklärung
-#define AD7719_IO_REGBIT_P4DAT      0x0002        // Erklärung
-#define AD7719_IO_REGBIT_P1DAT      0x0001        // Erklärung
+#define AD7719_IO_REGBIT_PSW2       0x8000        // if set enable power switch p2 to PWRGND. if cleared enable standard I/O-Pin
+#define AD7719_IO_REGBIT_PSW1       0x4000        // if set enable power switch p2 to PWRGND. if cleared enable standard I/O-Pin
+#define AD7719_IO_REGBIT_BO         0x1000        // Burnout Current Enable Bit
+#define AD7719_IO_REGBIT_I2PIN      0x0800        // IEXE2, 200uA Current Source Direction Bit
+#define AD7719_IO_REGBIT_I1PIN      0x0400        // IEXE1, 200uA Current Source Direction Bit
+#define AD7719_IO_REGBIT_I2EN       0x0200        // IEXC2 Current Source Enable Bit
+#define AD7719_IO_REGBIT_I1EN       0x0100        // IEXC1 Current Source Enable Bit
+#define AD7719_IO_REGBIT_P4DIR      0x0080        // P4 I/O Direction Bit (set = Output, cleared = Input)
+#define AD7719_IO_REGBIT_P3DIR      0x0040        // P3 I/O Direction Bit (set = Output, cleared = Input)
+#define AD7719_IO_REGBIT_P2EN       0x0020        // P2 digital Output Enable Bit
+#define AD7719_IO_REGBIT_P1EN       0x0010        // P1 digital Output Enable Bit
+#define AD7719_IO_REGBIT_P4DAT      0x0008        // P4 Digital Port Data
+#define AD7719_IO_REGBIT_P3DAT      0x0004        // P3 Digital Port Data
+#define AD7719_IO_REGBIT_P4DAT      0x0002        // P2 Digital Port Data
+#define AD7719_IO_REGBIT_P1DAT      0x0001        // P1 Digital Port Data
 
 #define AD7719_PSW_PWRGND           1
 #define AD7719_PSW_STDIO            0
+
+#define AD7719_IEXE2_TO_IOUT1       1
+#define AD7719_IEXE2_TO_IOUT2       0
+#define AD7719_IEXE1_TO_IOUT1       0
+#define AD7719_IEXE1_TO_IOUT2       1
 
 
 
