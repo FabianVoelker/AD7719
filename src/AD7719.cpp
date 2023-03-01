@@ -1115,15 +1115,14 @@ uint32_t AD7719::readMainADC(void)
       uint8_t reading[2] = {0,0};
       cmd = AD7719_READ_AD0DATA_REG;
       spi_dev->write_then_read(&cmd,1,reading,2);
-      temp = reading[0];
-      temp <<= 8;
-      temp |= reading[1];
+      temp = reading[1] | (reading[0] << 8);
     }
     else
     {
       uint8_t reading[3] = {0,0,0};
       cmd = AD7719_READ_AD0DATA_REG;
       spi_dev->write_then_read(&cmd,1,reading,3);
+      temp = reading[2] | (reading[1] << 8) | (reading[0] << 16);
     }
     return temp;
 }
@@ -1135,9 +1134,7 @@ uint16_t AD7719::readAuxADC(void)
     uint8_t reading[2] = {0,0};
     cmd = AD7719_READ_AD1DATA_REG;
     spi_dev->write_then_read(&cmd,1,reading,2);
-    temp = reading[0];
-    temp <<= 8;
-    temp |= reading[1];
+    temp = reading[1] | (reading[0] << 8);
     return temp;
 }
 

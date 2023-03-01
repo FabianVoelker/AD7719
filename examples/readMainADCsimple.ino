@@ -51,12 +51,31 @@ void setup()
     myADC.setChannelConfiguration(AD7719_MAIN_FULLYDIFF);
 
     // Set ADC in Continous Measurement mode
+    myADC.setADCMode(AD7719_SYSTEMFULLSCCAL);
+
+    while(myADC.getADCMode()!=1)
+    {
+        delay(100);
+    }
+    myADC.setADCMode(AD7719_SYSTEMFULLSCCAL);
+
+    while(myADC.getADCMode()!=1)
+    {
+        delay(100);
+    }
+
+    myADC.setADCMode(AD7719_CONTINUOUSMODE);
+    delay(100);
     myADC.setADCMode(AD7719_CONTINUOUSMODE);
 }
 
 void loop()
 {
+    while(!(myADC.getStatus() && 0b10000000))    
+    {
+        delay(100);
+    }
+
     uint32_t value = myADC.readMainADC();
-    Serial.println(value,DEC);
-    delay(2000);
+    delay(1000);
 }
