@@ -196,7 +196,7 @@
 #define AD7719_IO_REGBIT_P1EN       0x0010        // P1 digital Output Enable Bit
 #define AD7719_IO_REGBIT_P4DAT      0x0008        // P4 Digital Port Data
 #define AD7719_IO_REGBIT_P3DAT      0x0004        // P3 Digital Port Data
-#define AD7719_IO_REGBIT_P4DAT      0x0002        // P2 Digital Port Data
+#define AD7719_IO_REGBIT_P2DAT      0x0002        // P2 Digital Port Data
 #define AD7719_IO_REGBIT_P1DAT      0x0001        // P1 Digital Port Data
 
 #define AD7719_PSW_PWRGND           1
